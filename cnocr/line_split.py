@@ -149,7 +149,17 @@ def line_split_fine_print(image, n_font_sizes = 1, table=TABLE, split_threshold=
     content_t = np.where(diff==1)[0]
     content_b = np.where(diff==-1)[0]
     line_heights = content_b - content_t
+
     group_tol = np.ceil(min(line_heights)*0.5)
+    if len(line_heights) > 3:
+        line_margins = content_t[1:] - content_b[:-1]
+        line_margins_sorted = np.sort(line_margins)[::-1]
+        min_margin = line_margins_sorted[line_margins_sorted/shift(line_margins_sorted, -1, cval=1) >3][0]
+        invalid_margin_places = np.argwhere(line_margins < min_margin).flatten()
+        content_t = np.delete(content_t, invalid_margin_places+1)
+        content_b = np.delete(content_b, invalid_margin_places)
+        line_heights = content_b - content_t
+
     horizontal_ranges = np.array(
         [np.where(bn_mat[t:b + 1].sum(axis=0) > 0)[0][[0, -1]] for t, b in zip(content_t, content_b)])
     content_l, content_r = horizontal_ranges.T
@@ -194,7 +204,7 @@ def line_split_fine_print(image, n_font_sizes = 1, table=TABLE, split_threshold=
     )
     res = [(np.array(image.crop(box)), box)]
     if len(content_l_grouped) == 1:
-        return first_line
+        return res
     for i in range(1, len(content_l_grouped)-1):
         box = adjust_box(
             content_l_grouped[i], content_t[i], content_r_grouped[i], content_b[i], line_heights_grouped[i],
