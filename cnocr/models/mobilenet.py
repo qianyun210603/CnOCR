@@ -20,11 +20,23 @@
 
 from functools import partial
 from typing import Any, List, Optional, Callable
+from pkg_resources import parse_version
 
 from torch import nn, Tensor
-from torchvision.models.mobilenetv2 import ConvBNActivation
+import torchvision
 from torchvision.models import mobilenetv3
 from torchvision.models.mobilenetv3 import InvertedResidualConfig
+if parse_version(torchvision.__version__) >= parse_version('0.14'):
+    from torchvision.ops.misc import ConvNormActivation
+    class ConvBNActivation(ConvNormActivation):
+        def __init__(self, *args, **kwargs):
+            if kwargs.get("norm_layer", None) is None:
+                kwargs["norm_layer"] = nn.BatchNorm2d
+            if kwargs.get("activation_layer", None) is None:
+                kwargs["activation_layer"] = nn.ReLU6
+            super().__init__(*args, **kwargs)
+else:
+    from torchvision.models.mobilenetv2 import ConvBNActivation
 
 
 class MobileNetV3(mobilenetv3.MobileNetV3):

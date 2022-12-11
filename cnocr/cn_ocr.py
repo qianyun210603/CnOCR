@@ -33,7 +33,7 @@ from cnstd.utils import data_dir as det_data_dir
 
 from .consts import AVAILABLE_MODELS as REC_AVAILABLE_MODELS, VOCAB_FP
 from .utils import data_dir, read_img
-from .line_split import line_split
+import cnocr.line_split as line_split
 from .recognizer import Recognizer
 from .ppocr import PPRecognizer, PP_SPACE
 
@@ -163,7 +163,7 @@ class CnOcr(object):
             **rec_more_configs,
         )
 
-        self.det_model = None
+        self.det_model = det_model_name
         if det_model_name in DET_MODLE_NAMES:
             det_more_configs = det_more_configs or dict()
             self.det_model = CnStd(
@@ -239,7 +239,7 @@ class CnOcr(object):
         if isinstance(img_fp, Image.Image):  # Image to np.ndarray
             img_fp = np.asarray(img_fp.convert('RGB'))
 
-        if self.det_model is not None:
+        if self.det_model is not None and not isinstance(self.det_model, str):
             return self._ocr_with_det_model(
                 img_fp, rec_batch_size, return_cropped_image, **det_kwargs
             )
@@ -252,11 +252,14 @@ class CnOcr(object):
             img = 255 - img
         if len(img.shape) == 3 and img.shape[2] == 1:
             img = np.squeeze(img, axis=-1)
-        line_imgs = line_split(img, blank=True)
-        line_img_list = [line_img for line_img, _ in line_imgs]
+        line_split_fn = getattr(line_split, f'line_split_{self.det_model}', line_split.line_split)
+        line_img_list, line_box_list = zip(*line_split_fn(img, **det_kwargs))
         line_chars_list = self.ocr_for_single_lines(
             line_img_list, batch_size=rec_batch_size
         )
+        for _out, line_box in zip(line_chars_list, line_box_list):
+            _out['position'] = line_box
+
         if return_cropped_image:
             for _out, line_img in zip(line_chars_list, line_img_list):
                 _out['cropped_img'] = line_img
@@ -298,8 +301,9 @@ class CnOcr(object):
 
         return results
 
+    @staticmethod
     def _prepare_img(
-        self, img_fp: Union[str, Path, torch.Tensor, np.ndarray]
+        img_fp: Union[str, Path, torch.Tensor, np.ndarray]
     ) -> np.ndarray:
         """
 
