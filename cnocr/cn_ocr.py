@@ -66,9 +66,9 @@ class CnOcr(object):
         *,
         det_model_name: str = 'ch_PP-OCRv3_det',
         cand_alphabet: Optional[Union[Collection, str]] = None,
-        context: str = 'cpu',  # ['cpu', 'gpu', 'cuda']
+        context: str = 'gpu',  # ['cpu', 'gpu', 'cuda']
         rec_model_fp: Optional[str] = None,
-        rec_model_backend: str = 'onnx',  # ['pytorch', 'onnx']
+        rec_model_backend: str = 'pytorch',  # ['pytorch', 'onnx']
         rec_vocab_fp: Union[str, Path] = VOCAB_FP,
         rec_more_configs: Optional[Dict[str, Any]] = None,
         rec_root: Union[str, Path] = data_dir(),
