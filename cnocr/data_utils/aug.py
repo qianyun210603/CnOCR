@@ -70,7 +70,7 @@ class RandomStretchAug(object):
         new_w_ratio = self.min_ratio + random.random() * (
             self.max_ratio - self.min_ratio
         )
-        return F.resize(img, [h, int(w * new_w_ratio)])
+        return F.resize(img, [h, int(w * new_w_ratio)], antialias=True)
 
 
 class RandomCrop(torch.nn.Module):
@@ -115,7 +115,7 @@ class RandomCrop(torch.nn.Module):
         """
         ori_w, ori_h = get_image_size(img)
         i, j, h, w = self.get_params(ori_w, ori_h)
-        return F.resized_crop(img, i, j, h, w, (ori_h, ori_w), self.interpolation)
+        return F.resized_crop(img, i, j, h, w, [ori_h, ori_w], self.interpolation, antialias=True)
 
 
 class RandomPaddingAug(object):

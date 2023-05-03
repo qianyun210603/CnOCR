@@ -39,7 +39,7 @@ def read_tsv_file(fp, sep='\t', img_folder=None, mode='eval'):
     """
     img_fp_list, labels_list = [], []
     num_fields = 2 if mode != 'test' else 1
-    with open(fp) as f:
+    with open(fp, encoding='utf-8') as f:
         for line in f:
             fields = line.strip('\n').split(sep)
             assert len(fields) == num_fields

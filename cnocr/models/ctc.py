@@ -47,7 +47,7 @@ class CTCPostProcessor(object):
         input_lengths: Optional[torch.Tensor] = None,
         blank: int = 0,
     ) -> List[Tuple[List[str], float]]:
-        """Implements best path decoding as shown by Graves (Dissertation, p63), highly inspired from
+        """Implements the best path decoding as shown by Graves (Dissertation, p63), highly inspired from
         <https://github.com/githubharald/CTCDecoder>`_.
 
         Args:
