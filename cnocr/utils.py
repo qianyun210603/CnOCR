@@ -327,7 +327,7 @@ def resize_img(
         target_h_w = (IMG_STANDARD_HEIGHT, int(ori_width / ratio))
 
     if (ori_height, ori_width) != target_h_w:
-        img = F.resize(torch.from_numpy(img), target_h_w)
+        img = F.resize(torch.from_numpy(img), target_h_w, antialias=True)
         if not return_torch:
             img = img.numpy()
     elif return_torch:
